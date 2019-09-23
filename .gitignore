@@ -1,0 +1,17 @@
+build
+.vscode
+zconf.h
+zconf.h.included
+*.o
+*.os
+*.so
+*.dylib
+.import/
+*.dblite
+*.dll
+*.exp
+*.lib
+*.obj
+*.TMP
+logs
+Thumbs.db
