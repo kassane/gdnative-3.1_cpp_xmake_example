@@ -1,4 +1,5 @@
 build
+demo/bin
 .vscode
 zconf.h
 zconf.h.included
@@ -14,4 +15,5 @@ zconf.h.included
 *.obj
 *.TMP
 logs
+CMakeFiles
 Thumbs.db

@@ -35,7 +35,7 @@
 # Test build for Windows, Mac and mingw.
 
 project(gdexample)
-cmake_minimum_required(VERSION 3.6)
+cmake_minimum_required(VERSION 3.9)
 
 # Change the output directory to the bin directory
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -138,20 +138,13 @@ else()
 	endif(CMAKE_BUILD_TYPE MATCHES Debug)
 endif()
 
-# Generate source from the bindings file
-message(STATUS "Generating Bindings")
-execute_process(COMMAND "python" "-c" "import binding_generator; binding_generator.generate_bindings(\"${GODOT_CUSTOM_API_FILE}\")"
-	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-	RESULT_VARIABLE GENERATION_RESULT
-	OUTPUT_VARIABLE GENERATION_OUTPUT)
-message(STATUS ${GENERATION_RESULT} ${GENERATION_OUTPUT})
-
 # Get Sources
 file(GLOB_RECURSE SOURCES src/*.c**)
 file(GLOB_RECURSE HEADERS src/*.h**)
 
 # Define our library
-add_library(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+add_library(${PROJECT_NAME} SHARED ${SOURCES} ${HEADERS})
+
 # Godot-Cpp Include
 include_directories(
 	godot-cpp/include
@@ -183,11 +176,14 @@ endif(CMAKE_SIZEOF_VOID_P EQUAL 8)
 string(TOLOWER ${CMAKE_SYSTEM_NAME} SYSTEM_NAME)
 string(TOLOWER ${CMAKE_BUILD_TYPE} BUILD_TYPE)
 
-if(ANDROID)
-	# Added the android abi after system name
-	set(SYSTEM_NAME ${SYSTEM_NAME}.${ANDROID_ABI})
-	# Android does not have the bits at the end if you look at the main godot repo build
-	set_property(TARGET ${PROJECT_NAME} PROPERTY OUTPUT_NAME "godot-cpp.${SYSTEM_NAME}.${BUILD_TYPE}")
-else()
-	set_property(TARGET ${PROJECT_NAME} PROPERTY OUTPUT_NAME "godot-cpp.${SYSTEM_NAME}.${BUILD_TYPE}.${BITS}")
-endif()
+set(GDNATIVE_CPP_LIB "${GODOT_BINDING_CPP_DIR}/bin/libgodot-cpp.${SYSTEM_NAME}.${BUILD_TYPE}.${BITS}.a")
+target_link_libraries(${PROJECT_NAME} "-L${GDNATIVE_CPP_LIB}")
+
+# if(ANDROID)
+# 	# Added the android abi after system name
+# 	set(SYSTEM_NAME ${SYSTEM_NAME}.${ANDROID_ABI})
+# 	# Android does not have the bits at the end if you look at the main godot repo build
+# 	set_property(TARGET ${PROJECT_NAME} PROPERTY OUTPUT_NAME "godot-cpp.${SYSTEM_NAME}.${BUILD_TYPE}")
+# else()
+# 	set_property(TARGET ${PROJECT_NAME} PROPERTY OUTPUT_NAME "godot-cpp.${SYSTEM_NAME}.${BUILD_TYPE}.${BITS}")
+# endif()
