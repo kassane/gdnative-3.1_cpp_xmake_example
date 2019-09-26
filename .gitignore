@@ -1,5 +1,6 @@
 build
 demo/bin
+godot-cpp
 .xmake
 .vscode
 zconf.h

@@ -3,34 +3,6 @@
 add_rules("mode.release","mode.debug")
 
 -- add target
-target("godot-cpp")
-
-    -- set kind
-    set_kind("static")
-    set_targetdir("$(projectdir)/godot-cpp/bin")
-
-    if is_arch("x86_64") then
-        set_basename("godot-cpp.$(plat).$(mode).64")
-    else
-        set_basename("godot-cpp.$(plat).$(mode).32")
-    end
-
-    before_build (function (target)
-        print("echo Generating Bindings:")
-        --os.cp("$(projectdir)/godot-cpp/*.py", "$(projectdir)")
-        os.execv("python", {"-c","\"from godot-cpp.binding_generator.py import binding_generator; binding_generator.generate_bindings('/godot-cpp/godot_headers/api.json')\""})
-    end)
-
-    --cxxflags
-    add_cxflags("-fPIC")
-
-    -- includes
-    add_includedirs("$(projectdir)/godot-cpp/include", "$(projectdir)/godot-cpp/include/core", "$(projectdir)/godot-cpp/godot_headers", "$(projectdir)/godot-cpp/include/gen")
-
-    -- add files
-    add_files("$(projectdir)/godot-cpp/src/*/*.cpp") 
-
--- add target
 target("gdexample")
 
     set_kind("shared")
@@ -40,14 +12,34 @@ target("gdexample")
 
     elseif is_plat("windows") then
         set_targetdir("$(projectdir)/demo/bin/win$(arch)")
-
+    
     else
         set_targetdir("$(projectdir)/demo/bin/osx")
     end
 
     add_includedirs("$(projectdir)/godot-cpp/include", "$(projectdir)/godot-cpp/include/core", "$(projectdir)/godot-cpp/godot_headers", "$(projectdir)/godot-cpp/include/gen")
 --
-    add_deps("godot-cpp")
+    if os.exists("$(projectdir)/godot-cpp/bin/*.a") then
+        before_build (function (target)
+            print("Building godot-cpp:")
+            -- os.cp("$(projectdir)/godot-cpp/*.py", "$(projectdir)")
+            -- os.execv("python", {"-c","\"from godot-cpp.binding_generator.py import binding_generator; binding_generator.generate_bindings('/godot-cpp/godot_headers/api.json')\""})
+            if is_mode("debug") then
+                os.execv("cmake", {"godot-cpp","-B","build", "-DCMAKE_BUILD_TYPE=debug"})
+            else
+                os.execv("cmake", {"godot-cpp","-B","build", "-DCMAKE_BUILD_TYPE=release"})
+            end
+            os.execv("cmake", {"--build", "build"})
+        end)
+    end
+
+    -- add_deps("godot-cpp")
+    if is_arch("x86_64") then
+        add_links("godot-cpp.$(plat).$(mode).64")
+    else
+        add_links("godot-cpp.$(plat).$(mode).32")
+    end
+    add_linkdirs("$(projectdir)/godot-cpp/bin")
 
     add_files("src/*.cpp") 
 
