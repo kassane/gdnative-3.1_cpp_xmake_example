@@ -19,7 +19,7 @@ target("gdexample")
 
     add_includedirs("$(projectdir)/godot-cpp/include", "$(projectdir)/godot-cpp/include/core", "$(projectdir)/godot-cpp/godot_headers", "$(projectdir)/godot-cpp/include/gen")
 --
-    if os.exists("$(projectdir)/godot-cpp/bin/*.a") then
+    if not os.exists("$(projectdir)/godot-cpp/bin/*.a") then
         before_build (function (target)
             print("Building godot-cpp:")
             -- os.cp("$(projectdir)/godot-cpp/*.py", "$(projectdir)")
